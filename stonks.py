@@ -6,9 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 
 
-stock = 'TSLA'
+stock = 'AMZN'
 
-data = yf.download(stock, '2010-01-01', '2020-01-27')
+data = yf.download(stock, '2010-01-01', '2020-02-10')
 
 y = list(data['Adj Close'].values)
 xList = [i for i in range(1, len(y) + 1)]
