@@ -8,7 +8,7 @@ from sklearn.preprocessing import PolynomialFeatures
 def predict(new, degree, startDay):
     data = yf.download(stock, startDay, str(datetime.datetime.today()).split(" ")[0])
 
-    y = list(data['Adj Close'].values)
+    y = list(data['Adj Close'].values) + [list(yf.Ticker(stock).history(period="1d", interval='1m')['Open'].values)[-1]]
     xList = [i for i in range(1, len(y) + 1)]
     X = pandas.DataFrame(xList).values.reshape(-1, 1)
 
@@ -27,10 +27,9 @@ def predict(new, degree, startDay):
 
     pyplot.plot(X.flatten(), y, c='#000000')
     pyplot.scatter(X.flatten(), y_poly_pred, s=1, c=['#0000ff'])
-    pyplot.plot(new.flatten(), new_poly_pred, c='#0000ff', linewidth=2.5)
+    pyplot.scatter(new.flatten(), new_poly_pred, c='#ff0000', s=2)
     pyplot.title(stock)
 
-    # pyplot.show()
 
     return new_poly_pred[-1]
 
@@ -53,12 +52,11 @@ def predictDay(degree, new):
 
     y_poly_pred = model.predict(x_poly)
 
-    pyplot.plot(X.flatten(), y, c='#000000')
+    '''pyplot.plot(X.flatten(), y, c='#000000')
     pyplot.scatter(X.flatten(), y_poly_pred, s=1, c=['#0000ff'])
-    pyplot.plot(new.flatten(), new_poly_pred, c='#0000ff', linewidth=2.5)
-    pyplot.title(stock)
+    pyplot.scatter(new.flatten(), new_poly_pred, c='#ff0000', s=2)
+    pyplot.title(stock)'''
 
-    # pyplot.show()
 
     return new_poly_pred[-1]
 
@@ -66,7 +64,7 @@ def predictDay(degree, new):
 with open("boughtstonks.txt") as f:
     cur = f.read().split(" ")
 
-stocks = ["TSLA", "AMZN", "MSFT", "AAPL", "NIO", "GOOG"]
+stocks = ["TSLA", "GOOG", "AAPL"]
 day = 2
 curMoney = int(cur[1])
 prevPrice = float(cur[3])
@@ -75,11 +73,14 @@ prevPrice = float(cur[3])
 for stock in stocks:
     curPrice = list(yf.Ticker(stock).history(period="1d", interval='1m')['Open'].values)[-1]
 
-    pred = (predict(2, 2, '2020-01-01') + predict(2, 3, '2020-01-01') + predict(2, 2, '2020-02-01') + predict(2, 3, '2020-02-01')
-            + predict(2, 2, '2020-02-01') + predict(2, 3, '2020-02-01') + predictDay(2, 2) + predictDay(3, 2))/8
+    pred = (predict(2, 2, '2020-01-01') + predict(2, 3, '2020-01-01')*2
+            + predict(2, 2, '2020-02-01') + predict(2, 3, '2020-02-01')*2 + predictDay(2, 2)*3 + predictDay(3, 2)*3 + curPrice)/13
 
 
     print(pred - curPrice)
+
+    pyplot.show()
+
 
 # avg 5 day prediction for degrees 3 and 2, random times between 1 mo and `qœ6 mo
 # idea: compare with overall stock category trend? maybe later :)
